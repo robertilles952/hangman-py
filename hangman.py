@@ -7,7 +7,7 @@ word = random.choice(words)
 guesses = []
 lives = 6
 
-while True: 
+while lives > 0: 
     given_letter = input("give me a letter:")
     if given_letter in guesses:
         print("Letter already given.")
@@ -31,8 +31,6 @@ while True:
         else:
             lives -= 1
             print("Not in the word!")
-        #print("Remaining lives : " + str(lives))
-        #print("Hello from count lives:" + str(lives), str(given_letter), hiding_one)
         return lives
     
     hidden_word = show_hidden_word(word, guesses)
@@ -40,4 +38,6 @@ while True:
     lives = how_much_life
     print("Remaining lives : " + str(how_much_life))
     print(hidden_word)
+if lives == 0:
+    print("Game Over!")
 
