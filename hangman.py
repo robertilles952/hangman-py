@@ -6,8 +6,9 @@ words = ["kecske", "alma", "laptop", "telefon", "automobil"]
 word = random.choice(words)
 guesses = []
 lives = 6
+hidden_word = "_"
 
-while lives > 0: 
+while  lives > 0 and "_" in hidden_word: 
     given_letter = input("give me a letter:")
     if given_letter in guesses:
         print("Letter already given.")
@@ -39,5 +40,6 @@ while lives > 0:
     print("Remaining lives : " + str(how_much_life))
     print(hidden_word)
 if lives == 0:
-    print("Game Over!")
-
+    print("Game Over!""\n""The secret word was: " + word )
+if "_" not in hidden_word:
+    print("WINNNER WIINER CHICKEN DINNER!")
