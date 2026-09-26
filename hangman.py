@@ -2,13 +2,26 @@ import random
 
 def main():
     print("Welcome to Hangman!")
-
+    
+    def change_difficulty():
+        print("1)Easy 8 lives, 2)Medium 6 lives, 3)Hard 4 lives.")
+        difficulty = input("Chose difficulty: ")
+        difficulty = int(difficulty)
+        if difficulty == 1:
+            lives = 8
+        if difficulty == 2:
+            lives = 6
+        if difficulty == 3:
+            lives = 4
+        return lives
+    
     words = ["kecske", "alma", "laptop", "telefon", "automobil"]
     word = random.choice(words)
     guesses = []
-    lives = 6
+    lives = change_difficulty()
     hidden_word = "_"
 
+    
     while  lives > 0 and "_" in hidden_word: 
         given_letter = input("give me a letter:").lower()
         if not given_letter.isalpha():
