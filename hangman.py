@@ -9,7 +9,13 @@ lives = 6
 hidden_word = "_"
 
 while  lives > 0 and "_" in hidden_word: 
-    given_letter = input("give me a letter:")
+    given_letter = input("give me a letter:").lower()
+    if not given_letter.isalpha():
+        print("Not valid input!")
+        continue
+    if len(given_letter) > 1:
+        print("Use just one letter at a time.")
+        continue
     if given_letter in guesses:
         print("Letter already given.")
         continue
