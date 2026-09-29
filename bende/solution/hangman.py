@@ -2,28 +2,21 @@
 # Import the random module to select a random word from the list of secret words
 import random
 
+# --------------------------- CONSTANTS ---------------------------
+
+# Number of lives the player has at the start of the game
+INITIAL_LIVES: int = 6
+
+# List of secret words for the Hangman game
+SECRET_WORDS: list[str] = ["python", "hangman", "challenge", "programming", "development"]
+
 # Placeholder for hidden letters in the word to guess
 # if we want to change the placeholder for hidden letters, we only need to modify this constant.
 # This constant and constants are capitalized in accordance with Python naming conventions for constants.
 HIDDEN_WORD_PLACEHOLDER = "_"
 
-# Number of lives the player has at the start of the game
-lives: int = 6
 
-# List of secret words for the Hangman game
-secret_words: list[str] = ["python", "hangman", "challenge", "programming", "development"]
-
-
-# Select a random word from the list of secret words
-word_to_guess: str = random.choice(secret_words)
-
-# List of letters that have been guessed so far
-guessed_letters: list[str] = []
-
-### I use [f-string](https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals) 
-# to display the word to guess 
-# example: https://www.w3schools.com/python/python_strings_format.asp
-print(f"The word which you need to guess is: {word_to_guess}")
+# --------------------------- FUNCTIONS ---------------------------
 
 def ask_for_letter() -> str:
     """
@@ -77,7 +70,6 @@ def check_guess(letter: str, word: str) -> bool:
         bool: True if the guessed letter is in the word, False otherwise.
     """
     return letter in word
-
 
 def get_already_guessed_word(word: str, guessed_letters: list[str]) -> str:
     """Return the word with already guessed letters revealed and hidden letters replaced by the placeholder.
@@ -171,50 +163,113 @@ def is_game_over(still_alive: bool, has_won: bool) -> bool:
     """
     return not still_alive or has_won
 
+def ask_to_play_again():
+    """
+    Ask the player if they want to play again.
 
-# Boolean variable to track if the player is still alive
-still_alive: bool = True
+    Returns:
+        bool: True if the player wants to play again, False otherwise.
+    """
+    valid_yes_responses = ["yes", "y"]
+    valid_no_responses = ["no", "n"]
+    valid_responses = valid_yes_responses + valid_no_responses
 
-# Boolean variable to track if the player has won the game
-has_won: bool = False
-
-# Main game loop
-# The loop will continue for as long as the player is still alive.
-while not is_game_over(still_alive, has_won):
-
-    # Ask the user for a letter and store it in a variable
-    guessed_letter: str = ask_for_letter()
+    response: str = input(f"Do you want to play again? ({'/'.join(valid_responses)}): ").strip().lower()
     
-    # Add the guessed letter to the list of guessed letters
-    is_new_guess: bool = append_guessed_letter(guessed_letter, guessed_letters)
-    if not is_new_guess:
-        print(f"You have already guessed the letter '{guessed_letter}'.")
-        continue
+    while response not in valid_responses:
+        response = input(f"Please enter a valid response ({'/'.join(valid_responses)}): ").strip().lower()
+    
+    return response in valid_yes_responses
 
-    # Get the current state of the guessed word based on the letters guessed so far
-    guessed_word: str = get_already_guessed_word(word_to_guess, guessed_letters)
-    # Check if the guessed letter is in the word to guess and store the result in a variable
-    is_good_guess: bool = check_guess(guessed_letter, word_to_guess)
-    # Check if the player has won the game based on the current guessed word and the word to guess.
-    has_won = is_won(guessed_word, word_to_guess)
-    # Update the number of lives based on whether the guessed letter is correct
-    lives = update_lives(lives, is_good_guess)
-    # Check if the player is still alive after updating the number of lives
-    still_alive = is_still_alive(lives, guessed_word, word_to_guess)
 
-    # Display a message based on whether the guessed letter is correct or not
-    if is_good_guess:
-        print("Good guess!")
+# --------------------------- MAIN GAME LOOP ---------------------------
+
+def run_hangman_round():
+    """Run a single round of the Hangman game."""
+
+    # Number of lives the player has at the start of the game
+    lives: int = INITIAL_LIVES
+
+    # List of secret words for the Hangman game
+    secret_words: list[str] = SECRET_WORDS
+
+
+    # Select a random word from the list of secret words
+    word_to_guess: str = random.choice(secret_words)
+
+    # List of letters that have been guessed so far
+    guessed_letters: list[str] = []
+
+    ### I use [f-string](https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals) 
+    # to display the word to guess 
+    # example: https://www.w3schools.com/python/python_strings_format.asp
+    print(f"The word which you need to guess is: {word_to_guess}")
+
+
+    # Boolean variable to track if the player is still alive
+    still_alive: bool = True
+
+    # Boolean variable to track if the player has won the game
+    has_won: bool = False
+
+    # The loop will continue for as long as the player is still alive.
+    while not is_game_over(still_alive, has_won):
+
+        # Ask the user for a letter and store it in a variable
+        guessed_letter: str = ask_for_letter()
+        
+        # Add the guessed letter to the list of guessed letters
+        is_new_guess: bool = append_guessed_letter(guessed_letter, guessed_letters)
+        if not is_new_guess:
+            print(f"You have already guessed the letter '{guessed_letter}'.")
+            continue
+
+        # Get the current state of the guessed word based on the letters guessed so far
+        guessed_word: str = get_already_guessed_word(word_to_guess, guessed_letters)
+        # Check if the guessed letter is in the word to guess and store the result in a variable
+        is_good_guess: bool = check_guess(guessed_letter, word_to_guess)
+        # Check if the player has won the game based on the current guessed word and the word to guess.
+        has_won = is_won(guessed_word, word_to_guess)
+        # Update the number of lives based on whether the guessed letter is correct
+        lives = update_lives(lives, is_good_guess)
+        # Check if the player is still alive after updating the number of lives
+        still_alive = is_still_alive(lives, guessed_word, word_to_guess)
+
+        # Display a message based on whether the guessed letter is correct or not
+        if is_good_guess:
+            print("Good guess!")
+        else:
+            print("Not in the word.")
+        print(f"Lives remaining: {lives}")
+
+
+        # Display the word with already guessed letters
+        print(get_already_guessed_word(word_to_guess, guessed_letters))
+        print()  # Print an empty line for better readability between guesses
     else:
-        print("Not in the word.")
-    print(f"Lives remaining: {lives}")
+        if has_won:
+            print("Congratulations! You've guessed the word correctly!")
+        else:
+            print(f"Game over! The word was: {word_to_guess}")
+
+def main():
+    # Boolean variable to track if the player is still alive
+    still_playing: bool = True
+
+    # Main game loop
+    # The loop will continue for as long as the player wants to keep playing.
+    while still_playing:
+        run_hangman_round()
+
+        # After each round, ask the player if they want to play again
+        still_playing = ask_to_play_again()
 
 
-    # Display the word with already guessed letters
-    print(get_already_guessed_word(word_to_guess, guessed_letters))
-    print()  # Print an empty line for better readability between guesses
-else:
-    if has_won:
-        print("Congratulations! You've guessed the word correctly!")
-    else:
-        print(f"Game over! The word was: {word_to_guess}")
+# --------------------------- ENTRY POINT ---------------------------
+
+# Python sets __name__ to "__main__" when this file is run directly.
+# This check starts the game only then; importing this file from another
+# Python file will not start the game automatically.
+# Learn more: https://docs.python.org/3/library/__main__.html#name-main
+if __name__ == "__main__":
+    main()
