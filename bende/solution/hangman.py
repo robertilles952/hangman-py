@@ -7,6 +7,9 @@ import random
 # This constant and constants are capitalized in accordance with Python naming conventions for constants.
 HIDDEN_WORD_PLACEHOLDER = "_"
 
+# Number of lives the player has at the start of the game
+lives: int = 6
+
 # List of secret words for the Hangman game
 secret_words: list[str] = ["python", "hangman", "challenge", "programming", "development"]
 
@@ -69,6 +72,7 @@ def get_already_guessed_word(word: str, guessed_letters: list[str]) -> str:
 
     return result
 
+
 # Main game loop
 # The loop will continue forever since the game does not have a termination condition yet.
 while True:
@@ -85,6 +89,8 @@ while True:
         print("Good guess!")
     else:
         print("Not in the word.")
+        lives -= 1
+        print(f"Lives remaining: {lives}")
 
 
     # Display the word with already guessed letters
