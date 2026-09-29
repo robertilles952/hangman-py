@@ -31,7 +31,15 @@ def ask_for_letter() -> str:
     Returns:
         str: The guessed letter in lowercase.
     """
-    return input("Guess a letter: ").strip().lower()
+    current_guess: str = ""
+    is_valid_guess: bool = False
+    while not is_valid_guess:
+        current_guess = input("Guess a letter: ").strip().lower()
+        is_valid_guess = current_guess.isalpha() and len(current_guess) == 1
+        if not is_valid_guess:
+            print("Invalid input. Please enter a single letter.")
+
+    return current_guess
 
 def check_guess(letter: str, word: str) -> bool:
     """Check if the guessed letter is in the word to guess.
