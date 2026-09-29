@@ -1,6 +1,7 @@
 # import necessary modules
 # Import the random module to select a random word from the list of secret words
 import random
+import os
 from pathlib import Path
 
 # --------------------------- CONSTANTS ---------------------------
@@ -15,6 +16,12 @@ HIDDEN_WORD_PLACEHOLDER = "_"
 
 
 # --------------------------- FUNCTIONS ---------------------------
+
+def clear() -> None:
+    """Clear the console screen."""
+    # Use the appropriate command to clear the console screen based on the operating system.
+    # Run 'cls' if the operating system is Windows and 'clear' command if it is Unix-based systems.
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 def load_words() -> list[str]:
     """Load the list of secret words from the words.txt file."""
@@ -49,16 +56,18 @@ def ask_for_difficulty() -> dict[str, int]:
     difficulties_str: str = '\n'.join(f"{difficulty['input']}: {difficulty['level']} with {difficulty['lives']} lives" for difficulty in difficulties)
 
     # Ask the player to choose a difficulty level based on the displayed options.
-    user_difficulty_selection: int = int(input(f"Choose a difficulty level \n{difficulties_str}\n ").strip())
+    user_difficulty_selection: str = input(f"Choose a difficulty level \n{difficulties_str}\n ").strip()
 
     # Keep asking the player until a valid difficulty level is chosen.
     # Only those input numbers that correspond to available difficulties are considered valid.
-    while user_difficulty_selection not in [difficulty["input"] for difficulty in difficulties]:
-        user_difficulty_selection = int(input(f"Please enter a valid difficulty level \n{difficulties_str}\n ").strip())
+    while not user_difficulty_selection.isdigit() or int(user_difficulty_selection) not in [difficulty["input"] for difficulty in difficulties]:
+        clear()
+        user_difficulty_selection = input(f"Please enter a valid difficulty level \n{difficulties_str}\n ").strip()
 
     # Search for the chosen difficulty in the list and return it.
     for difficulty in difficulties:
-        if difficulty["input"] == user_difficulty_selection:
+        if difficulty["input"] == int(user_difficulty_selection):
+            clear()
             return difficulty
 
 def select_secret_words(difficulty: dict[str, int], words: list[str]) -> list[str]:
@@ -251,6 +260,9 @@ def ask_to_play_again():
 def run_hangman_round(words: list[str]):
     """Run a single round of the Hangman game."""
 
+    # Clear the console screen at the start of the game.
+    clear()
+
     # Selected difficulty level for the game based on user input
     difficulty: dict = ask_for_difficulty()
 
@@ -280,9 +292,9 @@ def run_hangman_round(words: list[str]):
 
     # The loop will continue for as long as the player is still alive.
     while not is_game_over(still_alive, has_won):
-
         # Ask the user for a letter and store it in a variable
         guessed_letter: str = ask_for_letter()
+        clear()
         
         # Add the guessed letter to the list of guessed letters
         is_new_guess: bool = append_guessed_letter(guessed_letter, guessed_letters)
@@ -319,7 +331,7 @@ def run_hangman_round(words: list[str]):
             print(f"Game over! The word was: {word_to_guess}")
 
 def main():
-
+    # Load the list of secret words from the word list file.
     secret_words = load_words()
 
     # Boolean variable to track if the player is still alive
