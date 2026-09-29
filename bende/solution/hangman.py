@@ -6,9 +6,6 @@ from pathlib import Path
 
 # --------------------------- CONSTANTS ---------------------------
 
-# Number of lives the player has at the start of the game
-INITIAL_LIVES: int = 6
-
 # Placeholder for hidden letters in the word to guess
 # if we want to change the placeholder for hidden letters, we only need to modify this constant.
 # This constant and constants are capitalized in accordance with Python naming conventions for constants.
