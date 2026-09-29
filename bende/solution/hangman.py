@@ -1,14 +1,12 @@
 # import necessary modules
 # Import the random module to select a random word from the list of secret words
 import random
+from pathlib import Path
 
 # --------------------------- CONSTANTS ---------------------------
 
 # Number of lives the player has at the start of the game
 INITIAL_LIVES: int = 6
-
-# List of secret words for the Hangman game
-SECRET_WORDS: list[str] = ["python", "hangman", "challenge", "programming", "development"]
 
 # Placeholder for hidden letters in the word to guess
 # if we want to change the placeholder for hidden letters, we only need to modify this constant.
@@ -17,6 +15,72 @@ HIDDEN_WORD_PLACEHOLDER = "_"
 
 
 # --------------------------- FUNCTIONS ---------------------------
+
+def load_words() -> list[str]:
+    """Load the list of secret words from the words.txt file."""
+
+    # Determine the path to the words.txt file located next to this Python file.
+    file_path_name = Path(__file__).with_name("words.txt")
+
+    # Open the words.txt file and read its contents.
+    with file_path_name.open(encoding="utf-8") as words_file:
+        secret_words: list[str] = []
+        # Read each line from the file, strip whitespace, convert to lowercase, and add to the list if not empty.
+        for line in words_file:
+            word = line.strip().lower()
+            if word:
+                secret_words.append(word)
+    return secret_words
+
+def ask_for_difficulty() -> dict[str, int]:
+    """Ask the player to choose a difficulty level.
+
+    Returns:
+        dict: The chosen difficulty level, including its input number, level name, and number of lives.
+    """
+    # Define the available difficulty levels for the game.
+    difficulties: list[dict[str, int]] = [
+        {"level": "easy", "input": 1, "lives": 10, "word_length": 6}, 
+        {"level": "medium", "input": 2, "lives": 7, "word_length": 10}, 
+        {"level": "hard", "input": 3, "lives": 5, "word_length": 12}
+    ]
+
+    # Create a string representation of the difficulties for display purposes.
+    difficulties_str: str = '\n'.join(f"{difficulty['input']}: {difficulty['level']} with {difficulty['lives']} lives" for difficulty in difficulties)
+
+    # Ask the player to choose a difficulty level based on the displayed options.
+    user_difficulty_selection: int = int(input(f"Choose a difficulty level \n{difficulties_str}\n ").strip())
+
+    # Keep asking the player until a valid difficulty level is chosen.
+    # Only those input numbers that correspond to available difficulties are considered valid.
+    while user_difficulty_selection not in [difficulty["input"] for difficulty in difficulties]:
+        user_difficulty_selection = int(input(f"Please enter a valid difficulty level \n{difficulties_str}\n ").strip())
+
+    # Search for the chosen difficulty in the list and return it.
+    for difficulty in difficulties:
+        if difficulty["input"] == user_difficulty_selection:
+            return difficulty
+
+def select_secret_words(difficulty: dict[str, int], words: list[str]) -> list[str]:
+        """Select secret words based on the chosen difficulty level.
+
+        Args:
+            difficulty (dict[str, int]): The chosen difficulty level.
+            words (list[str]): The list of all available secret words.
+
+        Returns:
+            list[str]: The filtered list of secret words matching the difficulty criteria.
+        """
+        filtered_words = []
+        for word in words:
+            word_length = sum(letter.isalpha() for letter in word)
+            if difficulty["level"] == "easy" and word_length <= difficulty["word_length"]:
+                filtered_words.append(word)
+            elif difficulty["level"] == "medium" and 5 <= word_length <= difficulty["word_length"]:
+                filtered_words.append(word)
+            elif difficulty["level"] == "hard" and word_length >= difficulty["word_length"]:
+                filtered_words.append(word)
+        return filtered_words
 
 def ask_for_letter() -> str:
     """
@@ -71,7 +135,7 @@ def check_guess(letter: str, word: str) -> bool:
     """
     return letter in word
 
-def get_already_guessed_word(word: str, guessed_letters: list[str]) -> str:
+def get_already_guessed_word(word: str, guessed_letters: list[str], placeholder: str = "_") -> str:
     """Return the word with already guessed letters revealed and hidden letters replaced by the placeholder.
 
     Args:
@@ -79,7 +143,7 @@ def get_already_guessed_word(word: str, guessed_letters: list[str]) -> str:
         guessed_letters (list[str]): The list of letters that have been guessed so far.
 
     Returns:
-        str: The word with guessed letters revealed and hidden letters replaced by the placeholder.
+        str: The word with guessed letters revealed and hidden letters replaced by the placeholder (default is "_").
     Example:
         >>> get_already_guessed_word("python", ["p", "o"])
         'p___o_'
@@ -87,13 +151,13 @@ def get_already_guessed_word(word: str, guessed_letters: list[str]) -> str:
 
     result: str = ""
     for letter in word:
-        if letter in guessed_letters:
+        if letter in guessed_letters or not letter.isalpha():
             result += letter
         else:
             # Consants can be used without sending them as parameters
             # Note that if we are moving this function to another module, we need to import the constant there as well.
             # (if we do not, want to do that, we have to pass it as a parameter)
-            result += HIDDEN_WORD_PLACEHOLDER
+            result += placeholder
 
     return result
 
@@ -184,15 +248,17 @@ def ask_to_play_again():
 
 # --------------------------- MAIN GAME LOOP ---------------------------
 
-def run_hangman_round():
+def run_hangman_round(words: list[str]):
     """Run a single round of the Hangman game."""
 
+    # Selected difficulty level for the game based on user input
+    difficulty: dict = ask_for_difficulty()
+
     # Number of lives the player has at the start of the game
-    lives: int = INITIAL_LIVES
+    lives: int = difficulty["lives"]
 
     # List of secret words for the Hangman game
-    secret_words: list[str] = SECRET_WORDS
-
+    secret_words: list[str] = select_secret_words(difficulty, words)
 
     # Select a random word from the list of secret words
     word_to_guess: str = random.choice(secret_words)
@@ -225,7 +291,7 @@ def run_hangman_round():
             continue
 
         # Get the current state of the guessed word based on the letters guessed so far
-        guessed_word: str = get_already_guessed_word(word_to_guess, guessed_letters)
+        guessed_word: str = get_already_guessed_word(word_to_guess, guessed_letters, HIDDEN_WORD_PLACEHOLDER)
         # Check if the guessed letter is in the word to guess and store the result in a variable
         is_good_guess: bool = check_guess(guessed_letter, word_to_guess)
         # Check if the player has won the game based on the current guessed word and the word to guess.
@@ -244,7 +310,7 @@ def run_hangman_round():
 
 
         # Display the word with already guessed letters
-        print(get_already_guessed_word(word_to_guess, guessed_letters))
+        print(guessed_word)
         print()  # Print an empty line for better readability between guesses
     else:
         if has_won:
@@ -253,13 +319,16 @@ def run_hangman_round():
             print(f"Game over! The word was: {word_to_guess}")
 
 def main():
+
+    secret_words = load_words()
+
     # Boolean variable to track if the player is still alive
     still_playing: bool = True
 
     # Main game loop
     # The loop will continue for as long as the player wants to keep playing.
     while still_playing:
-        run_hangman_round()
+        run_hangman_round(secret_words)
 
         # After each round, ask the player if they want to play again
         still_playing = ask_to_play_again()
