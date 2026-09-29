@@ -69,20 +69,24 @@ def get_already_guessed_word(word: str, guessed_letters: list[str]) -> str:
 
     return result
 
+# Main game loop
+# The loop will continue forever since the game does not have a termination condition yet.
+while True:
 
-# Ask the user for a letter and store it in a variable
-guessed_letter: str = ask_for_letter()
-# Add the guessed letter to the list of guessed letters
-guessed_letters.append(guessed_letter)
-# Check if the guessed letter is in the word to guess and store the result in a variable
-is_good_guess: bool = check_guess(guessed_letter, word_to_guess)
+    # Ask the user for a letter and store it in a variable
+    guessed_letter: str = ask_for_letter()
+    # Add the guessed letter to the list of guessed letters
+    guessed_letters.append(guessed_letter)
+    # Check if the guessed letter is in the word to guess and store the result in a variable
+    is_good_guess: bool = check_guess(guessed_letter, word_to_guess)
 
-# Display a message based on whether the guessed letter is correct or not
-if is_good_guess:
-    print("Good guess!")
-else:
-    print("Not in the word.")
+    # Display a message based on whether the guessed letter is correct or not
+    if is_good_guess:
+        print("Good guess!")
+    else:
+        print("Not in the word.")
 
 
-# Display the word with already guessed letters
-print(get_already_guessed_word(word_to_guess, guessed_letters))
+    # Display the word with already guessed letters
+    print(get_already_guessed_word(word_to_guess, guessed_letters))
+    print()  # Print an empty line for better readability between guesses
