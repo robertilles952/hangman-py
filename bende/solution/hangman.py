@@ -26,20 +26,45 @@ guessed_letters: list[str] = []
 print(f"The word which you need to guess is: {word_to_guess}")
 
 def ask_for_letter() -> str:
-    """Prompt the user to guess a letter and return it.
-
+    """
+    Prompt the user to guess a letter and return it.
+    
+    Only a single letter is considered valid.
     Returns:
         str: The guessed letter in lowercase.
     """
-    current_guess: str = ""
+
     is_valid_guess: bool = False
     while not is_valid_guess:
-        current_guess = input("Guess a letter: ").strip().lower()
+        current_guess: str = input("Guess a letter: ").strip().lower()
         is_valid_guess = current_guess.isalpha() and len(current_guess) == 1
         if not is_valid_guess:
             print("Invalid input. Please enter a single letter.")
 
     return current_guess
+
+def append_guessed_letter(letter: str, guessed_letters: list[str]) -> bool:
+    """
+    Append the guessed letter to the list of guessed letters if it hasn't been guessed already.
+
+    Args:
+        letter (str): The guessed letter.
+        guessed_letters (list[str]): The list of letters that have been guessed so far.
+
+    Returns:
+        bool: True if the letter was added to the list, False if it was already in the list.
+    """
+    if letter not in guessed_letters:
+        # since the guessed_letter list is not a copy of the original list(like letter parameter), appending to it will modify the original list.
+        # this means that the original list of guessed letters will be updated directly.
+        # Therefore, any changes made to the guessed_letters list inside this function will be reflected outside the function as well.
+        # This behavior is important to understand when working with mutable objects in Python.(this list object reflects the same object in memory as the original list)
+        # In this case, the function modifies the list in place rather than returning a new list.
+        # This behaviour is known as "modifying a mutable object in place."
+        guessed_letters.append(letter)
+        return True
+    else:
+        return False
 
 def check_guess(letter: str, word: str) -> bool:
     """Check if the guessed letter is in the word to guess.
@@ -159,8 +184,13 @@ while not is_game_over(still_alive, has_won):
 
     # Ask the user for a letter and store it in a variable
     guessed_letter: str = ask_for_letter()
+    
     # Add the guessed letter to the list of guessed letters
-    guessed_letters.append(guessed_letter)
+    is_new_guess: bool = append_guessed_letter(guessed_letter, guessed_letters)
+    if not is_new_guess:
+        print(f"You have already guessed the letter '{guessed_letter}'.")
+        continue
+
     # Get the current state of the guessed word based on the letters guessed so far
     guessed_word: str = get_already_guessed_word(word_to_guess, guessed_letters)
     # Check if the guessed letter is in the word to guess and store the result in a variable
@@ -177,7 +207,7 @@ while not is_game_over(still_alive, has_won):
         print("Good guess!")
     else:
         print("Not in the word.")
-        print(f"Lives remaining: {lives}")
+    print(f"Lives remaining: {lives}")
 
 
     # Display the word with already guessed letters
